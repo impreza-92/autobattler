@@ -25,10 +25,19 @@ Matches support a variable number of teams (configurable per match) and can be p
 - If multiple teams occupy the capture point simultaneously, a battle is triggered (see Section 2).
 - The **win condition** is reaching a configurable **score threshold**. The first team to accumulate enough points wins the match.
 - If the holding team is challenged and loses the battle, the capture point becomes neutral (or is seized by the victor).
+- Matches are designed to be **short and fast-paced**, targeting approximately **10 minutes or less** in total length. The score threshold is tuned so that roughly **5 minutes of uncontested holding** would be enough to win — but contestation, battles, and map traversal ensure matches stay dynamic and aggressive.
 
 ### 1.3 Environmental Manipulation
 
-Players can interact with and reshape the world map using both **destructive** and **constructive** actions. These actions cost resources (gold, items, or cooldown timers — specifics TBD) and are performed by the team on the world map in real-time.
+Players can interact with and reshape the world map using both **destructive** and **constructive** actions. Environmental actions have **no resource cost** — instead, they are activated through **battlefield triggers** scattered across the map. A trigger can only be activated if one or more units in the team possess the **required abilities** (unlocked via the archetype system, see Section 4.2).
+
+For example, a fire trigger near a forest can only be ignited if the team has a unit with fire magic abilities (e.g., a Mage or Pyromancer). More impactful environmental actions require higher-tier abilities or the combined presence of multiple qualifying units. This ties world map strategy directly to team composition — a team built purely for combat may lack the ability to manipulate the environment, while a versatile team can reshape the battlefield at the cost of raw combat power.
+
+**Trigger rules:**
+- Triggers are **visible on the map** (players can see them and plan routes accordingly).
+- Each trigger specifies which ability (or abilities) are required to activate it.
+- Basic triggers require a single qualifying unit; powerful triggers may require multiple units or advanced archetype abilities.
+- Once activated, the environmental effect persists for a duration or until cleared.
 
 #### Destructive / Denial
 
@@ -55,7 +64,28 @@ Players can interact with and reshape the world map using both **destructive** a
 - When two or more teams occupy the same space on the world map, a **battle** is triggered automatically.
 - Teams cannot pass through each other — meeting on a road forces a confrontation.
 - A team may choose to **retreat** from an area before an enemy arrives, but once overlap occurs, the battle begins.
-- If more than two teams collide simultaneously, the battle may be a multi-team free-for-all (rules TBD — possibly sequential battles or a three-way fight).
+
+#### Multi-Team Encounters (3+ Teams)
+
+When three or more teams collide at the same location, battles resolve **sequentially with damage carry-over**:
+
+1. The first two teams to arrive at the location fight each other.
+2. The **winning team retains all battle damage** — defeated units stay dead, surviving units keep their current HP.
+3. The next team in the arrival queue then fights the weakened winner.
+4. This continues until only one team remains or all challengers are defeated.
+
+This system **rewards arriving late** to a contested area — the last team to arrive fights weakened opponents. This creates a strategic tension on the world map: rushing to an area means fighting first (and being weakened for later arrivals), while hanging back means letting others score while you wait.
+
+Arrival order is determined by the order in which teams entered the contested tile.
+
+### 1.5 Map Design
+
+World maps use a **semi-procedural** approach:
+
+- **Hand-crafted base layouts**: The terrain, roads, rivers, chokepoints, capture point placement, and overall map structure are designed by hand. Multiple map layouts are available, selectable before a match (similar to selecting a map in a strategy game).
+- **Randomized placement**: Each match randomizes the positions of **treasure chests**, **NPC-guarded camps**, **environmental triggers**, and **shop locations** across the fixed layout. This ensures that even on familiar maps, players must adapt their routes and priorities each game.
+- **Map size** is tuned for the short match duration (~10 minutes). Maps are compact enough that teams can reach the capture point within the first minute, but offer enough side paths, chokepoints, and terrain variety for environmental manipulation and flanking.
+- Maps are designed with the **team count** in mind — larger team counts use larger maps with more starting positions spread around the periphery.
 
 ---
 
@@ -96,9 +126,10 @@ Back row units are **shielded** by their adjacent front row units. A back row un
 ### 2.4 Battle Resolution
 
 - A battle ends when all units on one side are defeated (HP reduced to 0).
-- Defeated units are **not permanently dead** — they are revived after the battle with reduced HP (exact amount TBD, e.g., 25% HP) or can be healed at healing zones on the world map.
-- The victorious team remains on the world map at the battle location and may continue moving.
-- The defeated team is pushed back / respawns at a designated location (TBD — could be their starting area or nearest safe point).
+- **Winning team**: Surviving units keep their **current HP** (no free heal). Defeated units in the winning team are revived with **1 HP**. The team remains at the battle location and may continue moving. Units can be healed at healing zones on the world map or via consumable items.
+- **Losing team**: The team loses **1 life** and respawns at their **starting area** with all units at **50% HP**.
+- Each team has **3 lives** per match (fixed, not configurable). After losing all 3 lives, the team is **permanently eliminated** from the match.
+- The lives system creates escalating stakes — early losses are recoverable, but repeated defeats lead to elimination. Combined with the sequential multi-team battle rules (Section 1.4), this means picking your fights wisely is critical.
 
 ---
 
@@ -126,9 +157,21 @@ Team editing can be done **at any time**, including during an active match on th
 
 ### 3.3 Roster
 
-- The player maintains a **roster** of units larger than 7 (exact roster size TBD).
-- Only 7 units can be fielded at a time; the rest are reserves.
+- The player maintains a **roster of up to 35 units**.
+- Only 7 units can be fielded at a time; the remaining 28 are reserves.
+- The large roster allows players to prepare multiple team configurations for different strategies, maps, and opponents.
 - Roster composition is managed between matches as part of meta-progression (see Section 6).
+
+### 3.4 Shopping
+
+During a match, players can visit **shop locations** on the world map to purchase consumable items and equipment.
+
+- Shopping follows the same **atomic edit + revert-on-attack** rules as team editing (see Section 3.1):
+  - The match **does not pause** while the player is browsing the shop.
+  - Purchases are staged and only **committed when the player confirms and resumes play**.
+  - If the team is **attacked while shopping**, no gold is spent and the inventory reverts to its pre-shopping state.
+- Consumables and equipment can also be purchased **between matches** without risk.
+- Shop inventory may vary by location and match.
 
 ---
 
@@ -136,7 +179,7 @@ Team editing can be done **at any time**, including during an active match on th
 
 ### 4.1 Stats
 
-Each unit has a **pool of stat points** (approximately **50 points** at base, increasing with level/progression) that the player distributes freely among the following stats:
+Each unit has a **pool of stat points** (**50 points** at base, increasing with level/progression and treasure pickups) that the player distributes freely among the following stats:
 
 | Stat                      | Abbreviation | Effect                                                                  |
 | ------------------------- | ------------ | ----------------------------------------------------------------------- |
@@ -156,12 +199,14 @@ Each unit has a **pool of stat points** (approximately **50 points** at base, in
 
 - Stat points can be **freely redistributed** during team editing (see Section 3).
 - Equipment may grant **bonus stat points** or flat bonuses on top of allocated stats.
+- With 13 stats competing for 50 points, players must make **meaningful tradeoffs**. Reaching even a single basic archetype threshold (10 points) requires committing 20% of the total pool. This ensures that builds are deliberate and that no single unit can do everything.
+- Additional stat points earned through leveling and treasures gradually expand build options over time.
 
 ### 4.2 Stat-Threshold Archetype System
 
 Instead of selecting a class at creation, units unlock **archetype abilities** by meeting stat thresholds. This allows deep build diversity and hybrid builds.
 
-#### Basic Archetype Thresholds (Examples)
+#### Basic Archetype Thresholds
 
 | Threshold             | Archetype Unlocked | Abilities Gained (Examples)                         |
 | --------------------- | ------------------ | --------------------------------------------------- |
@@ -173,7 +218,7 @@ Instead of selecting a class at creation, units unlock **archetype abilities** b
 | Lck ≥ 10              | Trickster          | Lucky Strike, Steal                                 |
 | HP ≥ 15               | Bulwark            | Endure, Last Stand                                  |
 
-#### Advanced Archetype Thresholds (Examples)
+#### Advanced Archetype Thresholds
 
 Higher thresholds within a single stat or **combined thresholds** across multiple stats unlock advanced archetypes:
 
@@ -213,6 +258,39 @@ There are **6 elements** arranged in opposing pairs:
 - **Weak against**: Deals reduced damage (e.g., 0.75× multiplier).
 - **Elemental affinity stats** increase both the damage dealt with that element and resistance to it (see Section 4.1).
 - Light and Dark are **mutually opposed** — each is both strong and weak against the other, making those matchups volatile and high-risk/high-reward.
+
+### 4.4 Equipment
+
+Each unit has **3 equipment slots**:
+
+| Slot      | Description                                                                 |
+| --------- | --------------------------------------------------------------------------- |
+| Weapon    | Determines the unit's basic attack type (melee/ranged, physical/magical) and grants stat bonuses or special on-hit effects. |
+| Armor     | Provides defensive stat bonuses (HP, Def, Res) and may grant passive effects (e.g., fire resistance, thorns damage). |
+| Accessory | A flexible slot for utility effects — bonus Speed, elemental affinity, status immunity, gauge modifiers, etc. |
+
+**Equipment design principles:**
+- There are **no rarity tiers**. All equipment is differentiated by **type and effects only** — there is no "Common vs Legendary" hierarchy. A sword that grants +3 Str and a sword that grants +2 Str and a fire-on-hit effect are different options, not differently ranked items.
+- This keeps power focused on **player decisions** (stat allocation, gambit programming, team composition) rather than loot RNG.
+- Equipment is obtained through **treasure pickups** on the world map, **shop purchases**, or **crafting** between matches.
+- Equipment effects can include: flat stat bonuses, elemental affinity bonuses, passive abilities (e.g., "counter-attack on hit", "regen 1% HP per action"), and status immunities.
+
+### 4.5 Consumable Items
+
+Consumable items are **one-time-use** items that can be assigned as actions in a unit's gambit list.
+
+| Category  | Examples                                                      |
+| --------- | ------------------------------------------------------------- |
+| Healing   | Health Potion (restore HP), Antidote (cure Poison), Remedy (cure any status) |
+| Offensive | Fire Bomb (AoE fire damage), Smoke Bomb (apply Blind to enemies) |
+| Utility   | Speed Draught (apply Haste to self), Shield Scroll (temporary Def boost) |
+
+**Consumable rules:**
+- Consumables are **purchased from shops** on the world map during a match (with atomic/revert-on-attack risk, see Section 3.4) or between matches.
+- Consumables can also be **found as treasures** during a match.
+- A unit can carry a limited number of consumables (exact limit TBD, e.g., 2–3 per unit).
+- Consumable usage is programmed via **gambits** just like any other action (e.g., "Self HP < 30% → Use Health Potion").
+- Once used, the consumable is gone. If all consumables of a type are depleted, gambits referencing that item are skipped.
 
 ---
 
@@ -265,12 +343,12 @@ Conditions are unlockable — players start with basic conditions and find or ea
 
 Actions are drawn from the unit's **unlocked archetype abilities** (see Section 4.2) plus universal actions:
 
-| Action         | Type     | Description                                      |
-| -------------- | -------- | ------------------------------------------------ |
-| Attack         | Physical | Basic physical attack. Always available.         |
-| Defend         | Utility  | Reduces incoming damage until next action.       |
-| [Ability Name] | Varies   | Any ability from unlocked archetypes.            |
-| Use Item       | Utility  | Uses a consumable item (if items are carried).   |
+| Action         | Type       | Description                                      |
+| -------------- | ---------- | ------------------------------------------------ |
+| Attack         | Physical   | Basic physical attack. Always available.         |
+| Defend         | Utility    | Reduces incoming damage until next action.       |
+| [Ability Name] | Varies     | Any ability from unlocked archetypes.            |
+| Use [Item]     | Consumable | Uses a specific consumable item if the unit is carrying one (see Section 4.5). |
 
 ### 5.5 Example Gambit Setup
 
@@ -335,9 +413,9 @@ Between matches, the player can:
 
 ### 6.3 Unit Growth
 
-- Units may gain **experience** from battles, increasing their base stat pool (e.g., from 50 to 55 points).
+- Units gain **experience** from battles, increasing their base stat pool (e.g., from 50 to 55 points at higher levels).
 - Leveling up may also unlock higher stat thresholds for more advanced archetypes.
-- The exact leveling curve and stat pool scaling are TBD and subject to balancing.
+- The leveling curve is designed to be gradual — each level grants 1–2 additional stat points, keeping early and late-game units relatively close in raw power while rewarding investment.
 
 ---
 
@@ -367,17 +445,19 @@ Both PvP and PvE share all core systems (world map, battles, gambits, progressio
 
 ---
 
-## Appendix: Open Questions & TBD
+## Appendix: Resolved Design Decisions
 
-| Topic                         | Status | Notes                                                   |
-| ----------------------------- | ------ | ------------------------------------------------------- |
-| Multi-team battles (3+ teams) | TBD    | How do free-for-all battles with 3+ teams work on the grid? |
-| Environmental action costs    | TBD    | What resource do environmental actions cost? Cooldowns? Gold? |
-| Exact stat pool numbers       | TBD    | Base pool of 50 is placeholder — needs playtesting.     |
-| Archetype threshold values    | TBD    | All threshold numbers are examples — needs balancing.   |
-| Roster size                   | TBD    | How many units can the player own beyond the active 7?  |
-| Defeat penalty                | TBD    | What happens to a defeated team? Respawn where? HP penalty? |
-| Match duration / score target | TBD    | Typical match length and score threshold values.        |
-| Item/consumable system        | TBD    | Are there consumable items? How do they interact with gambits? |
-| Equipment details             | TBD    | Weapon/armor types, rarity tiers, special effects.      |
-| Map size & topology           | TBD    | How large is the world map? Procedurally generated or fixed? |
+All formerly open questions have been resolved and integrated into the relevant sections:
+
+| Topic                         | Resolution | Section   |
+| ----------------------------- | ---------- | --------- |
+| Multi-team battles (3+ teams) | Sequential battles with damage carry-over; arrival order determines fight sequence | 1.4 |
+| Environmental action costs    | No resource cost — gated by unit abilities via battlefield triggers | 1.3 |
+| Stat pool numbers             | 50 base points confirmed; intentionally tight to force meaningful tradeoffs | 4.1 |
+| Archetype threshold values    | 10 for basic, 18 for advanced single-stat, 10+10 for combined — confirmed as design targets | 4.2 |
+| Roster size                   | 35 units maximum (7 active, 28 reserves) | 3.3 |
+| Defeat penalty                | 3 fixed lives per match; lose a life on defeat, respawn at start with 50% HP; eliminated after 3 losses | 2.4 |
+| Match duration / score target | ~10 minutes or less; ~5 minutes of uncontested holding to win | 1.2 |
+| Item/consumable system        | Consumables exist (potions, bombs, scrolls), purchased from shops with atomic-edit risk, usable via gambits | 4.5, 3.4 |
+| Equipment details             | 3 slots (Weapon, Armor, Accessory); no rarity tiers; differentiated by type and effects only | 4.4 |
+| Map size & topology           | Semi-procedural: hand-crafted layouts with randomized treasure/trigger/shop placement | 1.5 |
