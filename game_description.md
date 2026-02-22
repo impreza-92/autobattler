@@ -179,7 +179,7 @@ During a match, players can visit **shop locations** on the world map to purchas
 
 ### 4.1 Stats
 
-Each unit has a **pool of stat points** (**50 points** at base, increasing with level/progression and treasure pickups) that the player distributes freely among the following stats:
+Each unit has a **pool of stat points** (**50 points** at base, increasing with level/progression and treasure pickups). Every stat starts at a **minimum of 1** (which cannot be reduced), meaning 6 points are pre-allocated across the 6 core stats and 7 across the 7 elemental stats (13 total), leaving **37 points freely distributable** at base level. Individual stats are capped at **99** (reachable only with bonus points from leveling and treasures). The player distributes points among the following stats:
 
 | Stat                      | Abbreviation | Effect                                                                  |
 | ------------------------- | ------------ | ----------------------------------------------------------------------- |
@@ -199,7 +199,8 @@ Each unit has a **pool of stat points** (**50 points** at base, increasing with 
 
 - Stat points can be **freely redistributed** during team editing (see Section 3).
 - Equipment may grant **bonus stat points** or flat bonuses on top of allocated stats.
-- With 13 stats competing for 50 points, players must make **meaningful tradeoffs**. Reaching even a single basic archetype threshold (10 points) requires committing 20% of the total pool. This ensures that builds are deliberate and that no single unit can do everything.
+- Every stat has a **minimum of 1** and a **maximum of 99**. The player simply adds or removes points from individual stats. When the pool is empty, no more points can be added.
+- With 13 stats competing for 50 points (37 freely distributable after minimums), players must make **meaningful tradeoffs**. Reaching a single basic archetype threshold (10 points) requires investing 9 of the 37 free points (24%). This ensures builds are deliberate and no single unit can do everything.
 - Additional stat points earned through leveling and treasures gradually expand build options over time.
 
 ### 4.2 Stat-Threshold Archetype System

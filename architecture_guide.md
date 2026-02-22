@@ -190,19 +190,18 @@ The battle log is simply an observer that appends a text description for each ev
 
 ---
 
-### 2.7 Team Editor — Constrained State + Reactive Derivation
+### 2.7 Team Editor — Point Pool + Reactive Derivation
 
-**Pattern: Constrained State**
+**Pattern: Point Pool (spend/unspend)**
 
-The stat allocation system is a constrained state problem: 6 sliders that must always sum to ≤ 50. There are two viable approaches:
+The stat allocation system is a simple point pool. Each unit starts with **1 point in every stat** (minimum floor — cannot go below 1). The remaining points from the pool are freely spendable. Individual stats are capped at **99** (achievable only with bonus points from leveling/treasures in the full game).
 
-**Approach A — Clamp on change (simpler):**
-When the player drags a slider, calculate the new total. If it exceeds 50, clamp the changed slider so the total is exactly 50. The UI displays the "remaining points" counter.
-
-**Approach B — Proportional redistribution (smoother):**
-When the player increases one stat, proportionally decrease the others. This is more complex but feels better interactively.
-
-Recommendation: **Approach A** for the prototype. Simpler to implement and debug.
+Rules:
+- Total pool = 50 base (grows with leveling and treasures in the full game).
+- 6 stats × 1 minimum = 6 points pre-allocated. Leaves **44 freely distributable points**.
+- The player increases or decreases stats one at a time. If the pool is empty, the player cannot increase any stat further.
+- No clamping, no proportional redistribution — just a simple counter of remaining points.
+- The UI shows: current value per stat, remaining points in the pool, and whether a stat is at its minimum (1) or maximum (99).
 
 **Pattern: Reactive Derivation**
 
@@ -345,7 +344,7 @@ UnitConfig {
     name: string                // Player-chosen name
     position: number            // 0–6 (formation position)
     stats: {
-        hp: number              // 0–50, all six must sum to ≤ 50
+        hp: number              // 1–99, all six start at 1 (minimum), pool of 50 total at base
         str: number
         mag: number
         def: number
@@ -674,7 +673,7 @@ Battle engine emits events
 | Archetype system | Registry | Derived State | Data-driven, extensible |
 | Ability system | Registry | — | Add abilities without code changes |
 | Battle events | Observer / Event Bus | — | Decouples engine from UI |
-| Team editor state | Constrained State | Reactive Derivation | Enforces budget, auto-updates UI |
+| Team editor state | Point Pool | Reactive Derivation | Simple spend/unspend, auto-updates UI |
 | Persistence | Memento (serialize) | — | Save/load/export/replay |
 
 ---

@@ -75,8 +75,9 @@ Define the core data structures. No UI yet — just TypeScript types/interfaces.
 | Resistance | Res | Magical damage reduction: `finalDamage = max(1, damage - res)` |
 | Speed | Spd | Gauge fill rate per tick: `fillRate = 0.01 + spd * 0.005` |
 
-- **Stat point pool:** 50 points per unit, freely distributed across 6 stats.
-- Minimum value per stat: 0. Maximum value per stat: 50 (but budget-constrained).
+- **Stat point pool:** 50 points per unit. Every stat starts at a **minimum of 1** (cannot go below 1). With 6 stats in the prototype, 6 points are pre-allocated, leaving **44 points freely distributable**.
+- Minimum value per stat: 1. Maximum value per stat: 99 (unreachable with base 50 pool, but supports future growth from leveling/treasures).
+- The player simply adds or removes points. When the remaining pool hits 0, no more points can be added to any stat. No clamping or proportional redistribution — keep it simple.
 - The formulas above are starting points — they will need tuning during playtesting.
 
 **Team:**
